@@ -1,0 +1,3 @@
+[submodule "workout-app"]
+	path = workout-app
+	url = https://github.com/rahulravindrangeetha/workoutapp.git
