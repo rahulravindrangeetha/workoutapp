@@ -113,6 +113,103 @@ public class ServiceTest
 		
 	}
 	
+	@Test
+	public void addWorkout()
+	{
+		workoutService.createNewWorkout(workoutCollection1);
+		verify(workoutDao).createNewWorkout(any(WorkoutCollection.class));
+		
+	}
+	
+	@Test
+	public void updateWorkout()
+	{
+		workoutService.editWorkout(workoutCollection1);
+		verify(workoutDao).editWorkout(any(WorkoutCollection.class));
+		
+	}
+	
+	@Test
+	public void getaWorkoutActiveRec()
+	{
+		when(workoutDao.getActiveWorkoutRec(1)).thenReturn(workoutActive1);
+		WorkoutActive activeRec=workoutService.getActiveWorkoutRec(1);
+		assertEquals(activeRec.getWorkout().getWorkoutId(),1);
+		assertEquals(activeRec.getComment(),"runn");
+		verify(workoutDao).getActiveWorkoutRec(any(Integer.class));
+		
+	}
+	
+	@Test
+	public void startAWorkout()
+	{
+
+		workoutService.startWorkout(workoutActive1, 1);
+		verify(workoutDao).addActiveWorkout(any(WorkoutActive.class));
+		
+	}
+	
+	@Test
+	public void updateAWorkout()
+	{
+
+		workoutService.updateActiveWorkout(workoutActive2, 1);
+		verify(workoutDao).updateActiveWorkout((any(WorkoutActive.class)), any(Integer.class));
+		
+	}
+	
+	@Test
+	public void getAllCategories()
+	{
+
+		List workoutCategories = new ArrayList();
+		workoutCategories.add(workoutCategory1);
+		workoutCategories.add(workoutCategory2);
+		when(workoutCategoryDao.getAllWorkoutCategories()).thenReturn(workoutCategories);
+		List returnedData=workoutCategoryService.getAllWorkoutCategories();
+		assertEquals(2, returnedData.size());
+		verify(workoutCategoryDao).getAllWorkoutCategories();
+	}
+	
+	@Test
+	public void createCategoryTest()
+	{
+
+		workoutCategoryService.addNewWorkoutCategory(workoutCategory1);
+		verify(workoutCategoryDao).addNewWorkoutCategory(any(WorkoutCategory.class));
+	}
+	
+	@Test
+	public void updateCategoryTest()
+	{
+
+		workoutCategoryService.updateWorkoutCategory(workoutCategory1);
+		verify(workoutCategoryDao).updateWorkoutCategory(any(WorkoutCategory.class));
+	}
+	
+	
+	@Test
+	public void deleteCategoryTest()
+	{
+
+		workoutCategoryService.deleteWorkoutCategory(1);
+		verify(workoutCategoryDao).deleteWorkoutCategory(any(Integer.class));
+	}
+	
+	@Test
+	public void generateReportTest()
+	{
+
+		reportService.generateReport();
+		verify(reportDao).getCalorieBurntMonth();
+		verify(reportDao).getCalorieBurntWeek();
+		verify(reportDao).getCalorieBurntYear();
+		verify(reportDao).getWorkoutMinDay();
+		verify(reportDao).getWorkoutMinMonth();
+		verify(reportDao).getWorkoutMinWeek();
+	
+	}
+	
 	private void setData()
 	{
 		workoutCategory1= new WorkoutCategory();
