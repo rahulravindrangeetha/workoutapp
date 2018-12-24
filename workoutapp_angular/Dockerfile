@@ -1,9 +1,9 @@
-FROM node:9.6.1
+FROM node:10.13.0
 
 RUN mkdir /usr/src/workoutapp
 WORKDIR /usr/src/workoutapp
 
-RUN npm install -g @angular/cli@1.7.1 
+RUN npm install -g @angular/cli@7.0.6 
 
 COPY . /usr/src/app
 

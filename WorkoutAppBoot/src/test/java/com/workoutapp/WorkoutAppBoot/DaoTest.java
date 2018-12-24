@@ -1,8 +1,6 @@
 package com.workoutapp.WorkoutAppBoot;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,18 +12,23 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.ui.ModelMap;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import com.workoutapp.dao.ReportDao;
 import com.workoutapp.dao.WorkoutCategoryDao;
 import com.workoutapp.dao.WorkoutDao;
+import com.workoutapp.daoimpl.ReportDaoImpl;
+import com.workoutapp.daoimpl.WorkoutCategoryDaoImpl;
+import com.workoutapp.daoimpl.WorkoutDaoImpl;
 import com.workoutapp.entity.WorkoutActive;
 import com.workoutapp.entity.WorkoutCategory;
 import com.workoutapp.entity.WorkoutCollection;
@@ -36,27 +39,22 @@ import com.workoutapp.serviceimpl.ReportServiceImpl;
 import com.workoutapp.serviceimpl.WorkoutCategoryServiceImpl;
 import com.workoutapp.serviceimpl.WorkoutServiceImpl;
 
-@ActiveProfiles("test")
-@EnableConfigurationProperties
-public class ServiceTest 
+//@ActiveProfiles("test")
+@RunWith(SpringRunner.class)
+//@EnableConfigurationProperties
+//@TestPropertySource(locations = "classpath:application-test.properties")
+//@PropertySource("classpath:application-test.properties")
+@SpringBootTest
+public class DaoTest
 {
 	@InjectMocks
-	private WorkoutService workoutService=new WorkoutServiceImpl();
+	private WorkoutDao workoutDao=new WorkoutDaoImpl();
 	
 	@InjectMocks
-	private WorkoutCategoryService workoutCategoryService=new WorkoutCategoryServiceImpl();
+	private WorkoutCategoryDao workoutCategoryDao=new WorkoutCategoryDaoImpl();
 	
 	@InjectMocks
-	private ReportService reportService=new ReportServiceImpl();
-	
-	@Mock
-	private ReportDao reportDao;
-	
-	@Mock
-	private WorkoutDao workoutDao;
-	
-	@Mock
-	private WorkoutCategoryDao workoutCategoryDao;
+	private ReportDao reportDao=new ReportDaoImpl();
 	
 	private static WorkoutCategory workoutCategory1;
 	
@@ -85,29 +83,22 @@ public class ServiceTest
 	@Test
 	public void getWorkoutDetail()
 	{
-		List workouts = new ArrayList();
-		workouts.add(workoutCollection1);
-		workouts.add(workoutCollection2);
-		when(workoutDao.getAllWorkout()).thenReturn(workouts);
-		List returnedData=workoutService.getAllWorkout();
-		assertEquals(2, returnedData.size());
-		verify(workoutDao).getAllWorkout();
-		
+		workoutDao.getAllWorkout();
+		assertEquals(2, workoutDao.getAllWorkout().size());		
 	}
 	
 	@Test
 	public void getAWorkoutDetail()
 	{
-		when(workoutDao.getWorkout(1)).thenReturn(workoutCollection1);
-		WorkoutCollection workout=workoutService.getWorkout(1);
+		WorkoutCollection workout = workoutDao.getWorkout(1);
 		assertEquals(workout.getWorkoutId(),1);
-		assertEquals(workout.getWorkoutCategory(),workoutCategory1);
-		assertEquals(workout.getWorkoutTitle(),"medium pace run");
-		verify(workoutDao).getWorkout(any(Integer.class));
-		
+		assertEquals(workout.getWorkoutCategory().getCategoryId(),1);
+		assertEquals(workout.getWorkoutTitle(),"RUNNING");
+		assertEquals(workout.getWorkoutNote(),"HELLO2");
+		assertEquals(workout.getCalBurnPerMin(),11.5);		
 	}
 	
-	@Test
+	/*@Test
 	public void deleteWorkout()
 	{
 		workoutService.deleteWorkout(1);
@@ -210,16 +201,17 @@ public class ServiceTest
 		verify(reportDao).getWorkoutMinMonth();
 		verify(reportDao).getWorkoutMinWeek();
 	
-	}
+	}*/
 	
 	private void setData()
 	{
+
 		workoutCategory1= new WorkoutCategory();
 		workoutCategory1.setCategoryId(1);
-		workoutCategory1.setCategoryName("running");
+		workoutCategory1.setCategoryName("RUNNING");
 		workoutCategory2= new WorkoutCategory();
 		workoutCategory2.setCategoryId(2);
-		workoutCategory2.setCategoryName("cycling");
+		workoutCategory2.setCategoryName("SWIMMING");
 		workoutCollection1= new WorkoutCollection();
 		workoutCollection1.setWorkoutId(1);
 		workoutCollection1.setCalBurnPerMin(12.11f);
@@ -262,6 +254,7 @@ public class ServiceTest
 		workoutActive4.setEndTime(LocalTime.parse("06:15", DateTimeFormatter.ofPattern("HH:mm")));
 
 		
+	
 	}
 
 }

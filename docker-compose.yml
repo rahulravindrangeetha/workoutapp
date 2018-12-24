@@ -1,0 +1,15 @@
+version: "3"
+services:
+        msyql:
+            image: mariadb
+            ports:
+                 - "3326:3326"
+            volumes:
+                 - mysql_data:/var/lib/mysql
+            environment:
+                 MYSQL_ROOT_PASSWORD: pass@word1
+                 
+volumes:
+        mysql_data:
+            
+            

@@ -8,14 +8,21 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.EntityManagerFactory;
+
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean;
 import org.springframework.stereotype.Repository;
 
 import com.workoutapp.dao.ReportDao;
@@ -23,7 +30,6 @@ import com.workoutapp.entity.WorkoutActive;
 import com.workoutapp.model.CalorieBurntMonth;
 import com.workoutapp.model.CalorieBurntWeek;
 import com.workoutapp.model.CalorieBurntYear;
-import com.workoutapp.util.HibernateConnector;
 import static java.time.temporal.ChronoUnit.MINUTES;
 
 import java.time.DayOfWeek;
@@ -32,12 +38,14 @@ import java.time.Duration;
 @Repository
 public class ReportDaoImpl implements ReportDao 
 {
+	@Autowired
+    private EntityManagerFactory entityManagerFactory;
 
 	public double getWorkoutMinDay() 
 	{
 		try
 		{
-			Session sessionOne = HibernateConnector.getSessionFactory().openSession();
+			Session sessionOne = entityManagerFactory.unwrap(SessionFactory.class).openSession();
 	        sessionOne.beginTransaction();
 	        Criteria workoutMin=sessionOne.createCriteria(WorkoutActive.class);
 	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -90,7 +98,7 @@ public class ReportDaoImpl implements ReportDao
 	{
 		try
 		{
-			Session sessionOne = HibernateConnector.getSessionFactory().openSession();
+			Session sessionOne = entityManagerFactory.unwrap(SessionFactory.class).openSession();
 	        sessionOne.beginTransaction();
 	        Criteria workoutMin=sessionOne.createCriteria(WorkoutActive.class);
 	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -142,7 +150,7 @@ public class ReportDaoImpl implements ReportDao
 	{
 		try
 		{
-			Session sessionOne = HibernateConnector.getSessionFactory().openSession();
+			Session sessionOne = entityManagerFactory.unwrap(SessionFactory.class).openSession();
 	        sessionOne.beginTransaction();
 	        Criteria workoutMin=sessionOne.createCriteria(WorkoutActive.class);
 	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -199,7 +207,7 @@ public class ReportDaoImpl implements ReportDao
 
 		      LocalDate localDate = null;
 		      localDate = LocalDate.parse(LocalDate.now().with(DayOfWeek.MONDAY).toString(), formatter);
-			Session sessionOne = HibernateConnector.getSessionFactory().openSession();
+		      Session sessionOne = entityManagerFactory.unwrap(SessionFactory.class).openSession();
 	        sessionOne.beginTransaction();
 	        Query query = sessionOne.createSQLQuery("SELECT SUM(DATA_VAL.CALORIE_BURNT) AS CALORIE_BURNT, DAYNAME(DATA_VAL.END_DATE) AS DAY FROM( " + 
 	        		"SELECT WC.calories_burn_per_min * TIMESTAMPDIFF(MINUTE,CONCAT(DATE_FORMAT(WA.START_DATE,'%Y-%m-%d'),' ',DATE_FORMAT(WA.START_TIME,'%T')),CONCAT(DATE_FORMAT(WA.END_DATE,'%Y-%m-%d'),' ',DATE_FORMAT(WA.END_TIME,'%T'))) AS CALORIE_BURNT,WA.END_DATE " + 
@@ -247,7 +255,7 @@ public class ReportDaoImpl implements ReportDao
 
 		      LocalDate localDate = null;
 		      localDate = LocalDate.parse(LocalDate.now().withDayOfMonth(1).toString(), formatter);
-			Session sessionOne = HibernateConnector.getSessionFactory().openSession();
+		      Session sessionOne = entityManagerFactory.unwrap(SessionFactory.class).openSession();
 	        sessionOne.beginTransaction();
 	        Query query = sessionOne.createSQLQuery("SELECT SUM(DATA_VAL.CALORIE_BURNT) AS CALORIE_BURNT, WEEK(DATA_VAL.END_DATE)-WEEK(DATE_ADD(DATE_ADD(LAST_DAY(DATA_VAL.END_DATE),INTERVAL 1 DAY),INTERVAL - 1 MONTH))+  1 AS WEEK_VAL FROM( " + 
 	        		"SELECT WC.calories_burn_per_min * TIMESTAMPDIFF(MINUTE,CONCAT(DATE_FORMAT(WA.START_DATE,'%Y-%m-%d'),' ',DATE_FORMAT(WA.START_TIME,'%T')),CONCAT(DATE_FORMAT(WA.END_DATE,'%Y-%m-%d'),' ',DATE_FORMAT(WA.END_TIME,'%T'))) AS CALORIE_BURNT,WA.END_DATE " + 
@@ -291,7 +299,7 @@ public class ReportDaoImpl implements ReportDao
 
 		      LocalDate localDate = null;
 		      localDate = LocalDate.parse(LocalDate.now().withDayOfYear(1).toString(), formatter);
-			Session sessionOne = HibernateConnector.getSessionFactory().openSession();
+		      Session sessionOne = entityManagerFactory.unwrap(SessionFactory.class).openSession();
 	        sessionOne.beginTransaction();
 	        Query query = sessionOne.createSQLQuery("SELECT SUM(DATA_VAL.CALORIE_BURNT) AS CALORIE_BURNT, MONTH(DATA_VAL.END_DATE) AS MONTH FROM( " + 
 	        		"SELECT WC.calories_burn_per_min * TIMESTAMPDIFF(MINUTE,CONCAT(DATE_FORMAT(WA.START_DATE,'%Y-%m-%d'),' ',DATE_FORMAT(WA.START_TIME,'%T')),CONCAT(DATE_FORMAT(WA.END_DATE,'%Y-%m-%d'),' ',DATE_FORMAT(WA.END_TIME,'%T'))) AS CALORIE_BURNT,WA.END_DATE " + 

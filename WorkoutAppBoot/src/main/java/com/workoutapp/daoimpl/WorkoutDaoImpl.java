@@ -2,10 +2,14 @@ package com.workoutapp.daoimpl;
 
 import java.util.List;
 
-import org.hibernate.Session;
-import org.springframework.stereotype.Repository;
+import javax.persistence.EntityManagerFactory;
 
-import com.workoutapp.util.HibernateConnector;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean;
+import org.springframework.stereotype.Repository;
 import com.workoutapp.dao.WorkoutDao;
 import com.workoutapp.entity.WorkoutActive;
 import com.workoutapp.entity.WorkoutCollection;
@@ -13,12 +17,14 @@ import com.workoutapp.entity.WorkoutCollection;
 @Repository
 public class WorkoutDaoImpl implements WorkoutDao 
 {
+	@Autowired
+	private EntityManagerFactory entityManagerFactory;
 
 	public List<Object[]> getAllWorkout() 
 	{
 		try
 		{
-			Session sessionOne = HibernateConnector.getSessionFactory().openSession();
+			Session sessionOne = entityManagerFactory.unwrap(SessionFactory.class).openSession();
 	        sessionOne.beginTransaction();
 	        List<Object[]> workouts=sessionOne.createQuery("select WC,AW from WorkoutCollection WC left outer join WC.activeWorkouts as AW with AW.status='TRUE'").list();
 	        sessionOne.getTransaction().commit();
@@ -35,7 +41,7 @@ public class WorkoutDaoImpl implements WorkoutDao
 	{
 		try
 		{
-			Session sessionOne = HibernateConnector.getSessionFactory().openSession();
+			Session sessionOne = entityManagerFactory.unwrap(SessionFactory.class).openSession();
 			WorkoutCollection workoutt= new WorkoutCollection();
 			workoutt.setCalBurnPerMin(workout.getCalBurnPerMin());
 			workoutt.setWorkoutCategory(workout.getWorkoutCategory());
@@ -57,7 +63,7 @@ public class WorkoutDaoImpl implements WorkoutDao
 	{
 		try
 		{
-			Session sessionOne = HibernateConnector.getSessionFactory().openSession();
+			Session sessionOne = entityManagerFactory.unwrap(SessionFactory.class).openSession();
 	        sessionOne.beginTransaction();
 	        WorkoutCollection dbWorkout=sessionOne.load(WorkoutCollection.class, workout.getWorkoutId());
 	        editWorkout(dbWorkout,workout);
@@ -85,7 +91,8 @@ public class WorkoutDaoImpl implements WorkoutDao
 	{
 		try
 		{
-			Session sessionOne = HibernateConnector.getSessionFactory().openSession();
+			System.out.println("entityManagerFactory"+entityManagerFactory);
+			Session sessionOne = entityManagerFactory.unwrap(SessionFactory.class).openSession();
 	        sessionOne.beginTransaction();
 	        WorkoutCollection workout=(WorkoutCollection) sessionOne.get(WorkoutCollection.class,workoutId);
 	        sessionOne.getTransaction().commit();
@@ -102,7 +109,7 @@ public class WorkoutDaoImpl implements WorkoutDao
 	{
 		try
 		{
-			Session sessionOne = HibernateConnector.getSessionFactory().openSession();
+			Session sessionOne = entityManagerFactory.unwrap(SessionFactory.class).openSession();
 	        sessionOne.beginTransaction();
 	        org.hibernate.Query qry = sessionOne.createQuery("delete WorkoutActive WA where WA.workout.workoutId=?");
 	        qry.setParameter(0,workoutId);
@@ -124,7 +131,7 @@ public class WorkoutDaoImpl implements WorkoutDao
 	{
 		try
 		{
-			Session sessionOne = HibernateConnector.getSessionFactory().openSession();
+			Session sessionOne = entityManagerFactory.unwrap(SessionFactory.class).openSession();
 	        sessionOne.beginTransaction();
 	        String hql="SELECT workoutActive from WorkoutActive workoutActive where workoutActive.status=:status and workoutActive.workout.workoutId=:workoutId";
 	        List<WorkoutActive> activeWorkout=sessionOne.createQuery(hql).setString("status", "TRUE").setInteger("workoutId", workoutId).list();
@@ -142,7 +149,7 @@ public class WorkoutDaoImpl implements WorkoutDao
 	{
 		try
 		{
-			Session sessionOne = HibernateConnector.getSessionFactory().openSession();
+			Session sessionOne = entityManagerFactory.unwrap(SessionFactory.class).openSession();
 	        sessionOne.beginTransaction();
 	        org.hibernate.Query qry = sessionOne.createQuery("update WorkoutActive WA set WA.endDate=?, WA.endTime=?,WA.comment=?,WA.status='FALSE' where WA.workout.workoutId=? and WA.status='TRUE'");
 	        			        qry.setParameter(0,workoutActiveDB.getEndDate());
@@ -164,7 +171,7 @@ public class WorkoutDaoImpl implements WorkoutDao
 	{
 		try
 		{
-			Session sessionOne = HibernateConnector.getSessionFactory().openSession();
+			Session sessionOne = entityManagerFactory.unwrap(SessionFactory.class).openSession();
 	        sessionOne.beginTransaction();
 	        sessionOne.save(activeWorkout);
 	        sessionOne.getTransaction().commit();
